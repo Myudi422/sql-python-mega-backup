@@ -9,7 +9,7 @@ def backup_database():
     db_user = 'ccgnimex'
     db_password = 'aaaaaaac'
     db_name = 'ccgnimex'
-    backup_dir = '/www/wwwroot/ccgnimex.my.id/backupx'
+    backup_dir = '/www/wwwroot/ccgnimex.my.id/v2'
 
     # Generate nama file backup
     backup_file = f'{db_name}.sql'
