@@ -12,7 +12,8 @@ def backup_database():
     backup_dir = '/www/wwwroot/ccgnimex.my.id/v2'
 
     # Generate nama file backup
-    backup_file = f'{db_name}.sql'
+    current_time = datetime.datetime.now()
+    backup_file = f'{db_name}_{current_time.strftime("%Y%m%d_%H%M%S")}.sql'
 
     # Perintah untuk melakukan backup menggunakan mysqldump
     command = f'mysqldump --user={db_user} --password={db_password} {db_name} > {os.path.join(backup_dir, backup_file)}'
@@ -39,8 +40,18 @@ def upload_to_mega(file_path):
 
     print(f'File {os.path.basename(file_path)} berhasil diunggah ke Mega')
 
-# Jalankan backup dan upload setiap 1 menit
+# Fungsi untuk menunggu hingga jam 12 siang atau malam
+def wait_until_midday_or_midnight():
+    now = datetime.datetime.now()
+    next_midday = datetime.datetime(now.year, now.month, now.day, 12, 0)
+    next_midnight = datetime.datetime(now.year, now.month, now.day, 0, 0) + datetime.timedelta(days=1)
+    if now <= next_midday:
+        time.sleep((next_midday - now).total_seconds())
+    else:
+        time.sleep((next_midnight - now).total_seconds())
+
+# Jalankan backup dan upload pada jam 12 siang dan malam
 while True:
+    wait_until_midday_or_midnight()
     backup_file_path = backup_database()
     upload_to_mega(backup_file_path)
-    time.sleep(60)  # Tunggu selama 1 menit
