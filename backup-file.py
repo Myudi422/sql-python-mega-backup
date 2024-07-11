@@ -1,7 +1,6 @@
 import os
 import time
 import datetime
-import subprocess
 from mega import Mega
 import shutil
 
@@ -24,8 +23,21 @@ def upload_to_mega(file_path):
     mega = Mega()
     m = mega.login('myudi422@gmail.com', 'cinangka03')  # Ganti dengan email dan password Mega Anda
 
+    # Dapatkan daftar file di direktori root Mega
+    files = m.get_files()
+
+    # Filter file zip yang relevan
+    backup_files = [file for file in files.values() if file['a']['n'].endswith('.zip')]
+
+    # Jika ada lebih dari 1 file, hapus file backup tertua
+    if len(backup_files) > 1:
+        # Urutkan file berdasarkan waktu pembuatan
+        backup_files.sort(key=lambda x: x['ts'])
+        oldest_file = backup_files[0]
+        m.delete(oldest_file['h'])
+
     # Upload file baru
-    m.upload(file_path, dest_filename=os.path.basename(file_path))
+    m.upload(file_path)
 
     print(f'File {os.path.basename(file_path)} berhasil diunggah ke Mega')
 
