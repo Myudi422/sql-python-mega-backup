@@ -40,18 +40,27 @@ def upload_to_mega(file_path):
 
     print(f'File {os.path.basename(file_path)} berhasil diunggah ke Mega')
 
-# Fungsi untuk menunggu hingga jam 12 siang atau malam
-def wait_until_midday_or_midnight():
+# Fungsi untuk menunggu hingga salah satu dari empat waktu yang ditentukan
+def wait_until_next_backup_time():
     now = datetime.datetime.now()
-    next_midday = datetime.datetime(now.year, now.month, now.day, 12, 0)
-    next_midnight = datetime.datetime(now.year, now.month, now.day, 0, 0) + datetime.timedelta(days=1)
-    if now <= next_midday:
-        time.sleep((next_midday - now).total_seconds())
-    else:
-        time.sleep((next_midnight - now).total_seconds())
+    next_times = [
+        datetime.datetime(now.year, now.month, now.day, 0, 0),
+        datetime.datetime(now.year, now.month, now.day, 6, 0),
+        datetime.datetime(now.year, now.month, now.day, 12, 0),
+        datetime.datetime(now.year, now.month, now.day, 18, 0)
+    ]
 
-# Jalankan backup dan upload pada jam 12 siang dan malam
+    # Jika sekarang sudah melewati waktu-waktu tersebut, pindahkan ke hari berikutnya
+    next_times = [time if time > now else time + datetime.timedelta(days=1) for time in next_times]
+
+    # Dapatkan waktu berikutnya yang terdekat
+    next_backup_time = min(next_times)
+    time_to_wait = (next_backup_time - now).total_seconds()
+    print(f'Menunggu hingga {next_backup_time}')
+    time.sleep(time_to_wait)
+
+# Jalankan backup dan upload empat kali sehari
 while True:
-    wait_until_midday_or_midnight()
+    wait_until_next_backup_time()
     backup_file_path = backup_database()
     upload_to_mega(backup_file_path)
